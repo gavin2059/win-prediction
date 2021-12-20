@@ -1,6 +1,7 @@
 """ 
 TODO: actually use timeseries properly
 TODO: adjust data s.t. prediction doesn't have access to current day x
+TODO: use actual data from polygon API
 """
 
 # Importing the Libraries
