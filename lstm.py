@@ -21,32 +21,47 @@ from keras.layers import LSTM
 from keras.utils.vis_utils import plot_model
 from keras.callbacks import EarlyStopping
 
-## SETUP TRAINING MODEL
+class model:
 
-# Early callbacks to prevent overfitting
-earlystopping = EarlyStopping(
-        monitor='loss',min_delta=0.000000000001,patience=30, restore_best_weights = True)
+    def __init__(self, X_train, y_train, X_test, y_test, trainShape, batchShape):
+        self.X_train, self.y_train = X_train, y_train
+        self.X_test, self.textY = X_test, y_test
+        self.trainShape = trainShape
+        self.batchShape = batchShape
 
-# Create training model
-lstmTrain = Sequential()
-lstmTrain.add(LSTM(32, input_shape=(None, trainX.shape[1]), activation='relu', return_sequences=True))
-lstmTrain.add(LSTM(1, return_sequences=True))
+    def train(self):
+        # Early callbacks to prevent overfitting
+        earlystopping = EarlyStopping(
+                monitor='loss',min_delta=0.000000000001,patience=30, restore_best_weights = True)
 
-# Train model
-rates = [0.001,0.0001,0.00001]
-for rate in rates:
-    print('training with lr = ' + str(rate))
-    lstmTrain.compile(loss='mse', optimizer=Adam(lr=rate))
-    lstmTrain.fit(X_train,y_train,epochs=1000000,callbacks=[earlystopping],verbose=2) #train indefinitely until loss stops decreasing
-    print('\n\n\n\n\n')
+        # Create training model
+        self.lstmTrain = Sequential()
+        self.lstmTrain.add(LSTM(32, input_shape=self.trainShape, activation='relu', return_sequences=True))
+        self.lstmTrain.add(LSTM(1, return_sequences=True))
+
+        # Train model
+        rates = [0.001,0.0001,0.00001]
+        for rate in rates:
+            print('training with lr = ' + str(rate))
+            self.lstmTrain.compile(loss='mse', optimizer=Adam(lr=rate))
+            self.lstmTrain.fit(
+                self.X_train,self.y_train,epochs=1000000,
+                callbacks=[earlystopping],verbose=2) #train indefinitely until loss stops decreasing
+            print('\n\n\n\n\n')
+
+        # Create prediction model based on training model results
+        self.lstmPredict = Sequential()
+        self.lstmPredict.add(LSTM(32, input_shape=self.trainShape, activation='relu', 
+        return_sequences=True, stateful=True, batch_input_shape=self.batchShape))
+        self.lstmPredict.add(LSTM(1, return_sequences=False, stateful=True))
+        self.lstmPredict.set_weights(self.lstmTrain.get_weights())
+        self.lstmPredict.reset_states()
+
+    def predict(self):
+        pass
 
 ## SETUP PREDICTION MODEL
-lstmPredict = Sequential()
-lstmPredict.add(LSTM(32, input_shape=(None, trainX.shape[1]), activation='relu', 
-return_sequences=True, stateful=True, batch_input_shape=(1,None,4)))
-lstmPredict.add(LSTM(1, return_sequences=False, stateful=True))
-lstmPredict.set_weights(lstmTrain.get_weights())
-lstmPredict.reset_states()
+
 
 # Predicted vs True Adj Close Value – LSTM
 # plt.plot(y_test, label='True Value')
@@ -58,4 +73,4 @@ lstmPredict.reset_states()
 # plt.show()
 
 # Evaluate
-# print(lstmTrain.evaluate(X_test, y_test, batch_size = 8))
+# print(self.lstmTrain.evaluate(X_test, y_test, batch_size = 8))

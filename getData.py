@@ -8,11 +8,11 @@ class getData:
         self.client = RESTClient(self.key)
         self.ticker = 'X:BNBUSD'
         self.multiplier, self.timespan = 5, 'minute'
-        self.dateFrom, self.dateTo = "2017-07-23", "2019-12-24"
+        # self.dateFrom, self.dateTo = "2017-07-23", "2019-12-24"
+        self.dateFrom = str("2021-06-24")
+        self.dateTo = str(datetime.date.today())
 
     def getHistorical(self):
-        dateFrom, dateTo = "2017-07-23", "2019-12-24"
-        # dateTo = str(datetime.date.today())
         resp = self.client.crypto_aggregates(
             self.ticker, self.multiplier, self.timespan, 
             self.dateFrom, self.dateTo, limit=50000)
@@ -31,7 +31,8 @@ class getData:
             datetime.datetime.fromtimestamp(result['t']/1000.0))
 
     def exportRes(self, resp, name):
-        
+        pass
+
 
 a = getData()
 a.getHistorical()
