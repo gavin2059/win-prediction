@@ -30,5 +30,8 @@ class getData:
             print(result['o'], result['c'], 
             datetime.datetime.fromtimestamp(result['t']/1000.0))
 
+    def exportRes(self, resp, name):
+        
+
 a = getData()
 a.getHistorical()

@@ -6,7 +6,7 @@ from sklearn.model_selection import TimeSeriesSplit
 from sklearn.preprocessing import MinMaxScaler
 from sklearn import linear_model
 
-class  PrepData:
+class  prepData:
 
         def __init__(self):
                 # Visualize data
@@ -37,7 +37,6 @@ class  PrepData:
                         y_train, y_test = y[:len(train_index)].values.ravel(), y[len(train_index): (len(train_index)+len(test_index))].values.ravel()
 
                 # Process data for LSTM
-                # num = len(trainX) * 2.0/9.0
                 trainX = np.array(X_train)
                 testX = np.array(X_test)
 
