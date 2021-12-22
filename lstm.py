@@ -57,6 +57,7 @@ class model:
         self.lstmPredict.set_weights(self.lstmTrain.get_weights())
         self.lstmPredict.reset_states()
 
+    ## TODO
     def predict(self):
         pass
 

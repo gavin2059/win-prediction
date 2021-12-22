@@ -6,6 +6,9 @@ from sklearn.model_selection import TimeSeriesSplit
 from sklearn.preprocessing import MinMaxScaler
 from sklearn import linear_model
 
+## TODO fix timeseries split
+## TODO fix reshaping
+
 class  prepData:
 
         def __init__(self):
@@ -18,7 +21,7 @@ class  prepData:
                 if (self.df.isnull().values.any()):
                         self.df.dropna(axis = 0, how = 'any', inplace = True)
 
-        def prep(self):
+        def prep(self, data):
                 # Setup prediction
                 y = pd.DataFrame(self.df['Adj Close']) # Set dependent var
                 features = ['Open', 'High', 'Low', 'Volume'] # Set indep vars
@@ -30,11 +33,7 @@ class  prepData:
                 # feature variables' values are scaled down to smaller values compared to the real values given above.
                 print(featureTransform.head())
 
-                # Split into train and test set
-                timesplit = TimeSeriesSplit(n_splits = 9) # adv: samples are observed at fixed time intervals
-                for train_index, test_index in timesplit.split(featureTransform):
-                        X_train, X_test = featureTransform[:len(train_index)], featureTransform[len(train_index): (len(train_index)+len(test_index))]
-                        y_train, y_test = y[:len(train_index)].values.ravel(), y[len(train_index): (len(train_index)+len(test_index))].values.ravel()
+                X_train, y_train, X_test, y_test = self.split(featureTransform, y)
 
                 # Process data for LSTM
                 trainX = np.array(X_train)
@@ -42,3 +41,10 @@ class  prepData:
 
                 X_train = trainX.reshape(X_train.shape[0], 1, X_train.shape[1])
                 X_test = testX.reshape(X_test.shape[0], 1, X_test.shape[1])
+
+        def split(self, featureTransform, y):
+                   # Split into train and test set
+                timesplit = TimeSeriesSplit(n_splits = 9) # adv: samples are observed at fixed time intervals
+                for train_index, test_index in timesplit.split(featureTransform):
+                        X_train, X_test = featureTransform[:len(train_index)], featureTransform[len(train_index): (len(train_index)+len(test_index))]
+                        y_train, y_test = y[:len(train_index)].values.ravel(), y[len(train_index): (len(train_index)+len(test_index))].values.ravel()
