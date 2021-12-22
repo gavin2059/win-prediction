@@ -46,7 +46,8 @@ class model:
             self.lstmTrain.compile(loss='mse', optimizer=Adam(lr=rate))
             self.lstmTrain.fit(
                 self.X_train,self.y_train,epochs=1000000,
-                callbacks=[earlystopping],verbose=2) #train indefinitely until loss stops decreasing
+                callbacks=[earlystopping], validation_split=2.0/9.0,
+                verbose=2) #train indefinitely until loss stops decreasing
             print('\n\n\n\n\n')
 
         # Create prediction model based on training model results
@@ -59,6 +60,7 @@ class model:
 
     ## TODO
     def predict(self):
+        self.lstmPredict.predict
         pass
 
 ## SETUP PREDICTION MODEL
