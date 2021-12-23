@@ -39,6 +39,14 @@ class model:
         self.lstmTrain.add(LSTM(1, return_sequences=True))
 
         # Train model
+        """ 
+        OPTION 1: each batch is a sequence of n candles (need to optimize n).
+                  output is n+2th candle direction.
+                  model is not stateful.
+        OPTION 2: each batch is 1 candle. 
+                  output is 3rd candle direction.
+                  model is stateful.
+        """
         rates = [0.001,0.0001,0.00001]
         for rate in rates:
             print('training with lr = ' + str(rate))
@@ -59,7 +67,6 @@ class model:
 
     ## TODO
     def predict(self):
-        self.lstmPredict.predict
         pass
 
 ## SETUP PREDICTION MODEL
