@@ -1,38 +1,42 @@
 from polygon import RESTClient
 import datetime
+import requests
+import json
 
 class getData:
 
     def __init__(self):
-        self.key = "LfhlSKO9dfVHLLNp9SuHpqTKd5yVpEt2"
-        self.client = RESTClient(self.key)
-        self.ticker = 'X:BNBUSD'
-        self.multiplier, self.timespan = 5, 'minute'
-        # self.dateFrom, self.dateTo = "2017-07-23", "2019-12-24"
-        self.dateFrom = str("2021-06-24")
-        self.dateTo = str(datetime.date.today())
+        self.key = '6EC069D3-FB83-4BA6-902F-0119CD4F6D17'
+        self.headers = {'X-CoinAPI-Key': self.key}
 
     def getHistorical(self):
-        resp = self.client.crypto_aggregates(
-            self.ticker, self.multiplier, self.timespan, 
-            self.dateFrom, self.dateTo, limit=50000)
-        self.printRes(resp)
+        url = ''.join(['https://rest.coinapi.io/v1/', 'ohlcv/BNB/USD/',
+        'history?period_id=5MIN', '&time_start=2017-07-24T00:00:00',
+        '&time_end=2021-12-23T00:00:00', '&limit=', str(5)])
+        return self.get(url)
+
 
     def getLastN(self, n):
-        resp = self.client.crypto_aggregates(
-            self.ticker, self.multiplier, self.timespan, 
-            self.dateFrom, self.dateTo, limit=n, sort='desc')
-        self.printRes(resp)
+        url = ''.join(['https://rest.coinapi.io/v1/', 'ohlcv/BNB/USD/',
+        'latest?period_id=5MIN', '&limit=', str(n)])
+        return self.get(url)
+
+
+    def get(self, url):
+        response = requests.get(url, headers=self.headers)
+        response.close()
+        if (response.status_code == 200):
+            return response.json()
+        else:
+            raise Exception("Request failed with code " + response.status_code)
 
     def printRes(self, resp):
-        print(resp.ticker, resp.adjusted, resp.resultsCount)
-        for result in resp.results:
-            print(result['o'], result['c'], 
-            datetime.datetime.fromtimestamp(result['t']/1000.0))
+        pass
 
     def exportRes(self, resp, name):
         pass
 
 
 a = getData()
-a.getHistorical()
+# print(a.getLastN(10))
+print(a.getHistorical())
