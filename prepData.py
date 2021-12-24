@@ -21,6 +21,9 @@ class  prepData:
                 if (self.df.isnull().values.any()):
                         self.df.dropna(axis = 0, how = 'any', inplace = True)
 
+        def convert(self, json):
+                return pd.read_json(json)
+
         def prep(self, data):
                 # Setup prediction
                 y = pd.DataFrame(self.df['Adj Close']) # Set dependent var

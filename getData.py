@@ -26,7 +26,7 @@ class getData:
         response = requests.get(url, headers=self.headers)
         response.close()
         if (response.status_code == 200):
-            return response.json()
+            return json.dumps(response.json())
         else:
             raise Exception("Request failed with code " + response.status_code)
 
@@ -37,6 +37,6 @@ class getData:
         pass
 
 
-a = getData()
+# a = getData()
 # print(a.getLastN(10))
-print(a.getHistorical())
+# print(a.getHistorical())

@@ -1,9 +1,13 @@
 import getData
 import prepData
-import lstm
+import json
+# import lstm
 
 # Set up model
-getter, prepper = getData(), prepData()
-histData = getter.getHistorical()
-model = lstm(prepper.prep(histData))
-model.train()
+getter, prepper = getData.getData(), prepData.prepData()
+testData = getter.getLastN(5)
+df = prepper.convert(testData)
+print(df.head())
+# histData = getter.getHistorical()
+# model = lstm(prepper.prep(histData))
+# model.train()
