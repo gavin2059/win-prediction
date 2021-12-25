@@ -7,7 +7,6 @@ TODO: adjust data s.t. prediction doesn't have access to current day x
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib
 from keras.layers import LSTM, Dense, Dropout
 import matplotlib. dates as mandates
 from keras.models import Sequential
@@ -19,44 +18,50 @@ from keras.models import load_model
 from keras.layers import LSTM
 from keras.utils.vis_utils import plot_model
 from keras.callbacks import EarlyStopping
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import TimeSeriesSplit
 
 class model:
 
-    def __init__(self, X_train, y_train, X_test, y_test, trainShape, batchShape):
-        self.X_train, self.y_train = X_train, y_train
-        self.X_test, self.textY = X_test, y_test
+    def __init__(self, X, y, trainShape, batchShape):
+        self.X, self.y = X, y
         self.trainShape = trainShape
         self.batchShape = batchShape
-
-    def train(self):
-        # Early callbacks to prevent overfitting
-        earlystopping = EarlyStopping(
-                monitor='loss',min_delta=0.000000000001,patience=30, restore_best_weights = True)
-
+    
+    def createTrainModel(self):
         # Create training model
         self.lstmTrain = Sequential()
         self.lstmTrain.add(LSTM(32, input_shape=self.trainShape, activation='relu', return_sequences=True))
         self.lstmTrain.add(LSTM(1, return_sequences=True))
 
+    def trainNTimes(self, n):
+        # Split into train and test set
+        timesplit = TimeSeriesSplit(n_splits = n) # adv: samples are observed at fixed time intervals
+        i, score = 1, []
+        for tr_index, val_index in timesplit.split(self.X):
+            X_tr, X_val = self.X[tr_index], self.X[val_index]
+            y_tr, y_val = self.y[tr_index], self.y[val_index]
+            self.trainOnce(X_tr, y_tr)
+            score.append([i, self.lstmTrain.score(X_val, y_val)])
+            i += 1
+
+    def trainOnce(self, X_tr, y_tr):
+        # Early callbacks to prevent overfitting
+        earlystopping = EarlyStopping(
+                monitor='loss',min_delta=0.000000000001,patience=30, restore_best_weights = True)
+
         # Train model
-        """ 
-        OPTION 1: each batch is a sequence of n candles (need to optimize n).
-                  output is n+2th candle direction.
-                  model is not stateful.
-        OPTION 2: each batch is 1 candle. 
-                  output is 3rd candle direction.
-                  model is stateful.
-        """
         rates = [0.001,0.0001,0.00001]
         for rate in rates:
             print('training with lr = ' + str(rate))
             self.lstmTrain.compile(loss='mse', optimizer=Adam(lr=rate))
             self.lstmTrain.fit(
-                self.X_train,self.y_train,epochs=1000000,
+                self.X_tr,self.y_tr,epochs=1000000,
                 callbacks=[earlystopping], validation_split=2.0/9.0,
                 verbose=2) #train indefinitely until loss stops decreasing
             print('\n\n\n\n\n')
 
+    def createPredictModel(self):
         # Create prediction model based on training model results
         self.lstmPredict = Sequential()
         self.lstmPredict.add(LSTM(32, input_shape=self.trainShape, activation='relu', 

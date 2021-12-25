@@ -7,7 +7,6 @@ import json
 getter, prepper = getData.getData(), prepData.prepData()
 testData = getter.getLastN(5)
 df = prepper.convert(testData)
-print(df.head())
 prepper.prep(df)
 # histData = getter.getHistorical()
 # model = lstm(prepper.prep(histData))
