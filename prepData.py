@@ -11,43 +11,54 @@ from sklearn import linear_model
 
 class  prepData:
 
-        def __init__(self):
-                # Visualize data
-                self.df = pd.read_csv("BNB.csv", na_values = ['null'],
-                index_col = 'Date', parse_dates = True, infer_datetime_format = True)
-                self.df.head()
-
-                # Check for nulls
-                if (self.df.isnull().values.any()):
-                        self.df.dropna(axis = 0, how = 'any', inplace = True)
-
         def convert(self, json):
-                return pd.read_json(json)
+                return pd.read_json(
+                        json, orient='records',
+                        convert_dates=['time_period_start', 'time_period_end'])
 
-        def prep(self, data):
+        def prep(self, df, mode):
+                # Check for nulls
+                if (df.isnull().values.any()):
+                        df.dropna(axis = 0, how = 'any', inplace = True)
+
                 # Setup prediction
-                y = pd.DataFrame(self.df['Adj Close']) # Set dependent var
-                features = ['Open', 'High', 'Low', 'Volume'] # Set indep vars
-
+                y = pd.DataFrame()
+                # Output is whether candle moved up
+                y['up'] = (df['price_open'] < df['price_close'])
+                # Inputs are all available data for now
+                features = [ 
+                        'price_open', 'price_high', 'price_low', 
+                        'price_close', 'volume_traded', 'trades_count'] 
+                print(y.head())
                 # Scale data for performance and accuracy
-                scaler = MinMaxScaler()
-                featureTransform = scaler.fit_transform(self.df[features])
-                featureTransform = pd.DataFrame(columns = features, data = featureTransform, index = df.index)
+                if (mode == 'train'):
+                        scaledDf = self.scaleTrain(df, features)
+                else:
+                        scaledDf = self.scalePredict(df, features)
                 # feature variables' values are scaled down to smaller values compared to the real values given above.
-                print(featureTransform.head())
+                print(scaledDf.head())
 
-                X_train, y_train, X_test, y_test = self.split(featureTransform, y)
+                # X_train, y_train, X_test, y_test = self.split(scaledDf, y)
 
-                # Process data for LSTM
-                trainX = np.array(X_train)
-                testX = np.array(X_test)
+                # # Process data for LSTM
+                # trainX = np.array(X_train)
+                # testX = np.array(X_test)
 
-                X_train = trainX.reshape(X_train.shape[0], 1, X_train.shape[1])
-                X_test = testX.reshape(X_test.shape[0], 1, X_test.shape[1])
+                # X_train = trainX.reshape(X_train.shape[0], 1, X_train.shape[1])
+                # X_test = testX.reshape(X_test.shape[0], 1, X_test.shape[1])
 
-        def split(self, featureTransform, y):
+        def scaleTrain(self, df, features):
+                self.scaler = MinMaxScaler()
+                scaled = self.scaler.fit_transform(df[features])
+                return pd.DataFrame(columns = features, data = scaled, index = df.index)
+
+        def scalePredict(self, df, features):
+                scaled = self.scaler.transform(df[features])
+                return pd.DataFrame(columns = features, data = scaled, index = df.index)
+
+        def split(self, scaledDf, y):
                    # Split into train and test set
                 timesplit = TimeSeriesSplit(n_splits = 9) # adv: samples are observed at fixed time intervals
-                for train_index, test_index in timesplit.split(featureTransform):
-                        X_train, X_test = featureTransform[:len(train_index)], featureTransform[len(train_index): (len(train_index)+len(test_index))]
+                for train_index, test_index in timesplit.split(scaledDf):
+                        X_train, X_test = scaledDf[:len(train_index)], scaledDf[len(train_index): (len(train_index)+len(test_index))]
                         y_train, y_test = y[:len(train_index)].values.ravel(), y[len(train_index): (len(train_index)+len(test_index))].values.ravel()

@@ -1,0 +1,62 @@
+[
+    {
+        "time_period_start": "2021-12-25T20:45:00.0000000Z",
+        "time_period_end": "2021-12-25T20:50:00.0000000Z",
+        "time_open": "2021-12-25T20:45:01.6520000Z",
+        "time_close": "2021-12-25T20:47:25.4000000Z",
+        "price_open": 547.2638,
+        "price_high": 547.94,
+        "price_low": 547.1304,
+        "price_close": 547.6973,
+        "volume_traded": 23.011,
+        "trades_count": 38
+    },
+    {
+        "time_period_start": "2021-12-25T20:40:00.0000000Z",
+        "time_period_end": "2021-12-25T20:45:00.0000000Z",
+        "time_open": "2021-12-25T20:40:07.5110000Z",
+        "time_close": "2021-12-25T20:44:56.9770000Z",
+        "price_open": 545.9335,
+        "price_high": 547.76,
+        "price_low": 545.9335,
+        "price_close": 546.8996,
+        "volume_traded": 230.75,
+        "trades_count": 39
+    },
+    {
+        "time_period_start": "2021-12-25T20:35:00.0000000Z",
+        "time_period_end": "2021-12-25T20:40:00.0000000Z",
+        "time_open": "2021-12-25T20:35:33.8180000Z",
+        "time_close": "2021-12-25T20:39:51.6570000Z",
+        "price_open": 546.8023,
+        "price_high": 547.28,
+        "price_low": 545.9552,
+        "price_close": 546.2197,
+        "volume_traded": 61.512,
+        "trades_count": 17
+    },
+    {
+        "time_period_start": "2021-12-25T20:30:00.0000000Z",
+        "time_period_end": "2021-12-25T20:35:00.0000000Z",
+        "time_open": "2021-12-25T20:31:09.0390000Z",
+        "time_close": "2021-12-25T20:34:57.6020000Z",
+        "price_open": 547.0824,
+        "price_high": 547.94,
+        "price_low": 546.7286,
+        "price_close": 546.8295,
+        "volume_traded": 126.062,
+        "trades_count": 23
+    },
+    {
+        "time_period_start": "2021-12-25T20:25:00.0000000Z",
+        "time_period_end": "2021-12-25T20:30:00.0000000Z",
+        "time_open": "2021-12-25T20:25:04.7280000Z",
+        "time_close": "2021-12-25T20:29:31.3000000Z",
+        "price_open": 547.1503,
+        "price_high": 548.46,
+        "price_low": 546.8589,
+        "price_close": 546.8589,
+        "volume_traded": 80.003,
+        "trades_count": 33
+    }
+]
