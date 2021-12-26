@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import MinMaxScaler
 
@@ -31,7 +32,8 @@ class  prepData:
                         scaledDf = self.scalePredict(df, features)
                 # feature variables' values are scaled down to smaller values compared to the real values given above.
                 print(scaledDf.head())
-                return scaledDf
+                print(scaledDf.shape)
+                return self.reshape(scaledDf, y, 50, 1)
 
         def scaleTrain(self, df, features):
                 self.scaler = MinMaxScaler()
@@ -41,3 +43,12 @@ class  prepData:
         def scalePredict(self, df, features):
                 scaled = self.scaler.transform(df[features])
                 return pd.DataFrame(columns = features, data = scaled, index = df.index)
+
+        def reshape(self, scaledDf, y, lookback, lookahead):
+                X = np.reshape(scaledDf.to_numpy(), ((100000 // lookback), lookback, 6))
+                X = X[100000 - lookback:]
+                y = np.reshape(y.to_numpy(), (100000, lookahead, 1))
+                y = y[lookback + lookahead - 1: ]
+                return X, y
+
+                

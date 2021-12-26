@@ -35,12 +35,18 @@ class model:
         self.lstmTrain.add(LSTM(1, return_sequences=True))
 
     def trainNTimes(self, n):
+        look_back = 5
+        look_ahead = 1
+        # X_seq.shape --> (n_sample - look_back, look_back, n_feat_inp)        
+        # # y_seq.shape --> (n_sample - look_back, look_ahead, n_feat_out)
+
         # Split into train and test set
         timesplit = TimeSeriesSplit(n_splits = n) # adv: samples are observed at fixed time intervals
-        i, score = 1, []
+        i, score = 0, []
         for tr_index, val_index in timesplit.split(self.X):
             X_tr, X_val = self.X[tr_index], self.X[val_index]
             y_tr, y_val = self.y[tr_index], self.y[val_index]
+            np.reshape(X_tr, self.trainShape)
             self.trainOnce(X_tr, y_tr)
             score.append([i, self.lstmTrain.score(X_val, y_val)])
             i += 1

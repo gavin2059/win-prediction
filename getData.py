@@ -13,13 +13,13 @@ class getData:
         url = ''.join(['https://rest.coinapi.io/v1/', 'ohlcv/BNB/USD/',
         'history?period_id=5MIN', '&time_start=2017-07-24T00:00:00',
         '&time_end=2021-12-23T00:00:00', 
-        '&include_empty_items=true','&limit=', str(5)])
+        '&include_empty_items=false','&limit=', str(100000)])
         return self.get(url)
 
 
     def getLastN(self, n):
         url = ''.join(['https://rest.coinapi.io/v1/', 'ohlcv/BNB/USD/',
-        'latest?period_id=5MIN', '&include_empty_items=true', '&limit=', str(n)])
+        'latest?period_id=5MIN', '&include_empty_items=false', '&limit=', str(n)])
         return self.get(url)
 
 
