@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
-from keras.layers import LSTM, Dense, Dropout
+from keras.layers import LSTM, Dense, Dropout, Flatten, Bidirectional
 import matplotlib. dates as mandates
 from keras.models import Sequential
 from keras.layers import Dense
@@ -35,10 +35,16 @@ class model:
         tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
         # Create training model
         self.lstmTrain = Sequential()
-        print(self.trainShape)
-        self.lstmTrain.add(LSTM(32, input_shape=self.trainShape, activation='relu', return_sequences=False))
-        self.lstmTrain.add(LSTM(1, return_sequences=True))
-        self.lstmTrain.compile(loss='mse', optimizer=Adam(lr=0.0001), metrics=[metrics.Accuracy()])
+        self.lstmTrain.add(
+            Bidirectional(
+                LSTM(
+                    units=128, input_shape=(self.trainShape[1], self.trainShape[2]), 
+                    activation='relu', return_sequences=True, stateful=False)
+                )
+            )
+        self.lstmTrain.add(Dropout(rate=0.2))
+        self.lstmTrain.add(Dense(2, activation='sigmoid'))
+        self.lstmTrain.compile(loss='mse', optimizer=Adam(learning_rate=0.0001), metrics=[metrics.Accuracy()])
 
 
     def trainNTimes(self, n):
@@ -48,22 +54,23 @@ class model:
         for tr_index, val_index in timesplit.split(self.X):
             X_tr, X_val = self.X[tr_index], self.X[val_index]
             y_tr, y_val = self.y[tr_index], self.y[val_index]
-            np.reshape(X_tr, self.trainShape)
             self.trainOnce(X_tr, y_tr)
-            score.append([i, self.lstmTrain.score(X_val, y_val)])
+            print(self.lstmTrain.predict(X_val)[-1])
+            # print(self.lstmTrain.evaluate(X_val, y_val))
             i += 1
 
     def trainOnce(self, X_tr, y_tr):
-        # Early callbacks to prevent overfitting
-        earlystopping = EarlyStopping(
-                monitor='loss',min_delta=0.000000000001,patience=30, restore_best_weights = True)
+        # # Early callbacks to prevent overfitting
+        # earlystopping = EarlyStopping(
+        #         monitor='loss',min_delta=0.000000000001,patience=30, restore_best_weights = True)
 
         # Train model
-        print('training with lr = ' + str(rate))
-        self.lstmTrain.fit(
-            self.X_tr,self.y_tr,epochs=1000000,
-            callbacks=[earlystopping], validation_split=2.0/9.0,
-            verbose=2) #train indefinitely until loss stops decreasing
+        print('training with lr = ' + str(0.0001))
+        # self.lstmTrain.fit(
+        #     X_tr,y_tr,epochs=20,
+        #     callbacks=[earlystopping], validation_split=2.0/9.0,
+        #     verbose=2) #train indefinitely until loss stops decreasing
+        self.lstmTrain.fit(X_tr,y_tr,epochs=100,verbose=2)
         print('\n\n\n\n\n')
 
     def createPredictModel(self):
@@ -71,13 +78,16 @@ class model:
         self.lstmPredict = Sequential()
         self.lstmPredict.add(LSTM(32, input_shape=self.trainShape, activation='relu', 
         return_sequences=True, stateful=True, batch_input_shape=self.batchShape))
-        self.lstmPredict.add(LSTM(1, return_sequences=False, stateful=True))
+        self.lstmTrain.add(Flatten())
+        self.lstmPredict.add(Dense(1))
         self.lstmPredict.set_weights(self.lstmTrain.get_weights())
         self.lstmPredict.reset_states()
 
-    ## TODO
-    def predict(self):
-        pass
+    def updatePredictModel(self):
+        self.lstmPredict.set_weights(self.lstmTrain.get_weights())
+
+    def predict(self, X):
+        return self.lstmPredict.predict(X)
 
 ## SETUP PREDICTION MODEL
 

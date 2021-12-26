@@ -29,6 +29,7 @@ class getData:
         if (response.status_code == 200):
             fp = open(r"data.txt", "w")
             fp.write(json.dumps(response.json(), indent=4))
+            fp.close()
             return json.dumps(response.json())
         else:
             raise Exception("Request failed with code " + response.status_code)
