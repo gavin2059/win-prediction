@@ -46,7 +46,8 @@ class  prepData:
 
         def reshape(self, scaledDf, y, lookback, lookahead):
                 X = np.reshape(scaledDf.to_numpy(), ((100000 // lookback), lookback, 6))
-                X = X[100000 - lookback:]
+                X = X[:100000 - lookback]
+                X = np.squeeze(X, axis = 0)
                 y = np.reshape(y.to_numpy(), (100000, lookahead, 1))
                 y = y[lookback + lookahead - 1: ]
                 return X, y

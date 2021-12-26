@@ -7,6 +7,7 @@ TODO: adjust data s.t. prediction doesn't have access to current day x
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import tensorflow as tf
 from keras.layers import LSTM, Dense, Dropout
 import matplotlib. dates as mandates
 from keras.models import Sequential
@@ -14,6 +15,7 @@ from keras.layers import Dense
 import keras.backend as K
 from keras.callbacks import EarlyStopping
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras import metrics
 from keras.models import load_model
 from keras.layers import LSTM
 from keras.utils.vis_utils import plot_model
@@ -24,22 +26,22 @@ from sklearn.model_selection import TimeSeriesSplit
 class model:
 
     def __init__(self, X, y, trainShape, batchShape):
+        tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
         self.X, self.y = X, y
         self.trainShape = trainShape
         self.batchShape = batchShape
     
     def createTrainModel(self):
+        tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
         # Create training model
         self.lstmTrain = Sequential()
-        self.lstmTrain.add(LSTM(32, input_shape=self.trainShape, activation='relu', return_sequences=True))
+        print(self.trainShape)
+        self.lstmTrain.add(LSTM(32, input_shape=self.trainShape, activation='relu', return_sequences=False))
         self.lstmTrain.add(LSTM(1, return_sequences=True))
+        self.lstmTrain.compile(loss='mse', optimizer=Adam(lr=0.0001), metrics=[metrics.Accuracy()])
+
 
     def trainNTimes(self, n):
-        look_back = 5
-        look_ahead = 1
-        # X_seq.shape --> (n_sample - look_back, look_back, n_feat_inp)        
-        # # y_seq.shape --> (n_sample - look_back, look_ahead, n_feat_out)
-
         # Split into train and test set
         timesplit = TimeSeriesSplit(n_splits = n) # adv: samples are observed at fixed time intervals
         i, score = 0, []
@@ -57,15 +59,12 @@ class model:
                 monitor='loss',min_delta=0.000000000001,patience=30, restore_best_weights = True)
 
         # Train model
-        rates = [0.001,0.0001,0.00001]
-        for rate in rates:
-            print('training with lr = ' + str(rate))
-            self.lstmTrain.compile(loss='mse', optimizer=Adam(lr=rate))
-            self.lstmTrain.fit(
-                self.X_tr,self.y_tr,epochs=1000000,
-                callbacks=[earlystopping], validation_split=2.0/9.0,
-                verbose=2) #train indefinitely until loss stops decreasing
-            print('\n\n\n\n\n')
+        print('training with lr = ' + str(rate))
+        self.lstmTrain.fit(
+            self.X_tr,self.y_tr,epochs=1000000,
+            callbacks=[earlystopping], validation_split=2.0/9.0,
+            verbose=2) #train indefinitely until loss stops decreasing
+        print('\n\n\n\n\n')
 
     def createPredictModel(self):
         # Create prediction model based on training model results
