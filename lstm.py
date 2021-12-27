@@ -26,13 +26,11 @@ from sklearn.model_selection import TimeSeriesSplit
 class model:
 
     def __init__(self, X, y, trainShape, batchShape):
-        tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
         self.X, self.y = X, y
         self.trainShape = trainShape
         self.batchShape = batchShape
     
     def createTrainModel(self):
-        tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
         # Create training model
         self.lstmTrain = Sequential()
         self.lstmTrain.add(
@@ -43,9 +41,9 @@ class model:
                 )
             )
         self.lstmTrain.add(Dropout(rate=0.2))
-        self.lstmTrain.add(Dense(2, activation='sigmoid'))
-        self.lstmTrain.compile(loss='mse', optimizer=Adam(learning_rate=0.0001), metrics=[metrics.Accuracy()])
-
+        self.lstmTrain.add(Dense(1, activation='sigmoid'))
+        self.lstmTrain.compile(loss='binary_crossentropy', 
+        optimizer=Adam(learning_rate=0.001), metrics=['accuracy'])
 
     def trainNTimes(self, n):
         # Split into train and test set
@@ -55,9 +53,12 @@ class model:
             X_tr, X_val = self.X[tr_index], self.X[val_index]
             y_tr, y_val = self.y[tr_index], self.y[val_index]
             self.trainOnce(X_tr, y_tr)
-            print(self.lstmTrain.predict(X_val)[-1])
-            # print(self.lstmTrain.evaluate(X_val, y_val))
             i += 1
+            print(self.lstmTrain.evaluate(X_val, y_val))
+            if (i == n):
+                print(self.lstmTrain.summary())
+                # print(self.lstmTrain.predict(X_val)[-1])
+                # print(self.lstmTrain.evaluate(X_val, y_val))
 
     def trainOnce(self, X_tr, y_tr):
         # # Early callbacks to prevent overfitting
@@ -70,7 +71,7 @@ class model:
         #     X_tr,y_tr,epochs=20,
         #     callbacks=[earlystopping], validation_split=2.0/9.0,
         #     verbose=2) #train indefinitely until loss stops decreasing
-        self.lstmTrain.fit(X_tr,y_tr,epochs=100,verbose=2)
+        self.lstmTrain.fit(X_tr,y_tr,epochs=20,verbose=2)
         print('\n\n\n\n\n')
 
     def createPredictModel(self):

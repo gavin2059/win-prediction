@@ -18,8 +18,13 @@ class  prepData:
                 # Setup prediction
                 y = pd.DataFrame()
                 # Output is whether candle moved up / down
-                y['up'] = df['price_open'] < df['price_close']
-                y['down'] = df['price_open'] >= df['price_close']
+                y['up'] = (df['price_open'] < df['price_close']) * 1
+                # y['down'] = (df['price_open'] > df['price_close']) * 1
+                # y['same'] = (df['price_open'] == df['price_close']) * 1
+                # y['up'] = pd.Series([1 for x in range(100000)])
+                # y['down'] = pd.Series([0 for x in range(100000)])
+                # y['same'] = pd.Series([0 for x in range(100000)])
+                print(y.head())
                 # Inputs are all available data for now
                 features = [ 
                         'price_open', 'price_high', 'price_low', 
@@ -31,7 +36,7 @@ class  prepData:
                 else:
                         scaledDf = self.scalePredict(df, features)
                 # feature variables' values are scaled down to smaller values compared to the real values given above.
-                return self.reshape(scaledDf, y, 50, 1)
+                return self.reshape(scaledDf, y, 100, 1)
 
         def scaleTrain(self, df, features):
                 self.scaler = MinMaxScaler()
@@ -45,9 +50,8 @@ class  prepData:
         def reshape(self, scaledDf, y, lookback, lookahead):
                 x = np.reshape(scaledDf.to_numpy(), ((100000 // lookback), lookback, 6))
                 x = x[:100000 // lookback - lookback]
-                y = np.reshape(y.to_numpy(), (100000 // lookback, lookback, 2))
+                y = np.reshape(y.to_numpy(), (100000 // lookback, lookback, 1))
                 y = y[lookback + lookahead - 1: ]
-                print(x.shape, y.shape)
                 return x, y
 
                 
